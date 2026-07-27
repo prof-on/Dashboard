@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Interativo - Concurso de Docentes</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- DataTables CSS & JS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <style>
+        body { background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+            background: #2563eb !important; color: white !important; border: none; border-radius: 0.375rem;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: #1d4ed8 !important; color: white !important; border: none;
+        }
+        table.dataTable tbody tr:hover { background-color: #f1f5f9; }
+        .card { background: white; border-radius: 0.75rem; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body class="p-6">
+    <div class="max-w-7xl mx-auto space-y-6">
+        
+        <!-- Header -->
+        <div class="card p-6 bg-slate-900 text-white flex flex-col md:flex-row justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold">Dashboard Interativo - Concurso de Docentes</h1>
+                <p class="text-slate-400 text-sm mt-1">Análise dinâmica por Grupo de Recrutamento, Ordenação por Graduação e Filtro de Prioridades</p>
+            </div>
+            <div class="mt-4 md:mt-0 text-right">
+                <span class="inline-block px-3 py-1 bg-blue-600 text-xs font-semibold rounded-full uppercase tracking-wider">Dados Nacionais</span>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="card p-6">
+            <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 00-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                Filtros e Controlo do Dashboard
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Select Grupo -->
+                <div>
+                    <label for="grupoSelect" class="block text-sm font-medium text-slate-700 mb-2">Grupo de Recrutamento</label>
+                    <select id="grupoSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+                        <option value="ALL">-- Todos os Grupos --</option>
+                    </select>
+                </div>
+
+                <!-- Select Order -->
+                <div>
+                    <label for="orderSelect" class="block text-sm font-medium text-slate-700 mb-2">Ordenação por Graduação Profissional</label>
+                    <select id="orderSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+                        <option value="desc">Descendente (Maior p/ Menor Graduação)</option>
+                        <option value="asc">Ascendente (Menor p/ Maior Graduação)</option>
+                    </select>
+                </div>
+
+                <!-- Filter Prioridades -->
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">Prioridades a Incluir</label>
+                    <div class="flex items-center space-x-4 pt-1">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="1" class="priority-checkbox form-checkbox h-5 w-5 text-blue-600 rounded" checked>
+                            <span class="ml-2 text-sm text-slate-700 font-medium">1ª Prioridade</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="2" class="priority-checkbox form-checkbox h-5 w-5 text-blue-600 rounded" checked>
+                            <span class="ml-2 text-sm text-slate-700 font-medium">2ª Prioridade</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" value="3" class="priority-checkbox form-checkbox h-5 w-5 text-blue-600 rounded" checked>
+                            <span class="ml-2 text-sm text-slate-700 font-medium">3ª Prioridade</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="card p-5 border-l-4 border-l-blue-600">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total de Candidatos</div>
+                <div id="statTotal" class="text-2xl font-bold text-slate-800 mt-1">0</div>
+            </div>
+            <div class="card p-5 border-l-4 border-l-emerald-600">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Candidatos Colocados</div>
+                <div id="statColocados" class="text-2xl font-bold text-emerald-600 mt-1">0</div>
+            </div>
+            <div class="card p-5 border-l-4 border-l-amber-600">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Graduação Média</div>
+                <div id="statGradMedia" class="text-2xl font-bold text-slate-800 mt-1">0.000</div>
+            </div>
+            <div class="card p-5 border-l-4 border-l-purple-600">
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">Graduação Máxima</div>
+                <div id="statGradMax" class="text-2xl font-bold text-purple-600 mt-1">0.000</div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="card p-6">
+                <h3 class="text-md font-semibold text-slate-800 mb-4">Distribuição por Situação</h3>
+                <div class="h-64">
+                    <canvas id="chartSituacao"></canvas>
+                </div>
+            </div>
+            <div class="card p-6">
+                <h3 class="text-md font-semibold text-slate-800 mb-4">Distribuição por Prioridade</h3>
+                <div class="h-64">
+                    <canvas id="chartPrioridade"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Section -->
+        <div class="card p-6">
+            <h3 class="text-lg font-semibold text-slate-800 mb-4">Lista Detalhada de Candidatos</h3>
+            <div class="overflow-x-auto">
+                <table id="docentesTable" class="w-full text-sm text-left text-slate-600 display">
+                    <thead class="text-xs text-slate-700 uppercase bg-slate-100">
+                        <tr>
+                            <th>N.º Ordem</th>
+                            <th>N.º Utilizador</th>
+                            <th>Nome do/a Candidato/a</th>
+                            <th>Grupo Recrutamento</th>
+                            <th>Prioridade</th>
+                            <th>Graduação</th>
+                            <th>Classif. Prof.</th>
+                            <th>Idade</th>
+                            <th>Situação</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Embedded Data & Interactive Scripts -->
+    <script>
+        const rawData = [
+            {"N.º Ordem":1,"N.º Utilizador":6211448694,"Nome do/a Candidato/a":"ISABEL OLÍVIA DA SILVA FERREIRA CLARO DA FONSECA","Grupo Recrutamento":"100 - Educação Pré-Escolar","Prioridade":1,"Graduação":57.03,"Classificação Profissional":15.0,"Idade":63.4,"Situação":"Não Colocado"},
+            {"N.º Ordem":2,"N.º Utilizador":3724179456,"Nome do/a Candidato/a":"ELIETE BATISTA FERREIRA","Grupo Recrutamento":"100 - Educação Pré-Escolar","Prioridade":1,"Graduação":57.03,"Classificação Profissional":15.0,"Idade":63.0,"Situação":"Colocado"},
+            {"N.º Ordem":3,"N.º Utilizador":9310927283,"Nome do/a Candidato/a":"MARIA JOSÉ SIMÕES BERNARDO","Grupo Recrutamento":"100 - Educação Pré-Escolar","Prioridade":1,"Graduação":56.847,"Classificação Profissional":15.0,"Idade":65.1,"Situação":"Não Colocado"},
+            {"N.º Ordem":4,"N.º Utilizador":7617014007,"Nome do/a Candidato/a":"ANABELA PARAISO NUNES","Grupo Recrutamento":"100 - Educação Pré-Escolar","Prioridade":1,"Graduação":56.019,"Classificação Profissional":16.0,"Idade":64.0,"Situação":"Colocado"},
+            {"N.º Ordem":5,"N.º Utilizador":9559646125,"Nome do/a Candidato/a":"ANA CRISTINA FREITAS PAULA DIAS","Grupo Recrutamento":"100 - Educação Pré-Escolar","Prioridade":1,"Graduação":55.942,"Classificação Profissional":14.0,"Idade":65.0,"Situação":"Colocado"},
+            {"N.º Ordem":6,"N.º Utilizador":9128772318,"Nome do/a Candidato/a":"MARIA JOÃO MORA DA CRUZ","Grupo Recrutamento":"100 - Educação Pré-Escolar","Prioridade":1,"Graduação":55.86,"Classificação Profissional":15.0,"Idade":63.0,"Situação":"Colocado"},
+            {"N.º Ordem":7,"N.º Utilizador":3980036286,"Nome do/a Candidato/a":"ANABELA FRIAS AUGUSTO LOPES","Grupo Recrutamento":"100 - Educação Pré-Escolar","Prioridade":1,"Graduação":55.718,"Classificação Profissional":15.0,"Idade":62.0,"Situação":"Não Colocado"},
+            {"N.º Ordem":8,"N.º Utilizador":2603997521,"Nome do/a Candidato/a":"ANA PAULA DAS DORES MESTRE AZEVEDO","Grupo Recrutamento":"100 - Educação Pré-Escolar","Prioridade":1,"Graduação":55.051,"Classificação Profissional":15.0,"Idade":60.0,"Situação":"Colocado"},
+            {"N.º Ordem":9,"N.º Utilizador":7262104179,"Nome do/a Candidato/a":"PAULO FERREIRA DEL PINO FERNANDES ANDRÉ","Grupo Recrutamento":"100 - Educação Pré-Escolar","Prioridade":1,"Graduação":54.986,"Classificação Profissional":15.0,"Idade":62.0,"Situação":"Colocado"},
+            {"N.º Ordem":10,"N.º Utilizador":9900948300,"Nome do/a Candidato/a":"MARIA LEONOR SACADURA BISCAIA DA SILVA PINTO CALEIRAS","Grupo Recrutamento":"100 - Educação Pré-Escolar","Prioridade":1,"Graduação":54.951,"Classificação Profissional":16.0,"Idade":61.0,"Situação":"Colocado"}
+        ];
+
+        let dataTable;
+        let chartSituacao, chartPrioridade;
+
+        $(document).ready(function() {
+            // Populate select groups
+            const grupos = [...new Set(rawData.map(item => item["Grupo Recrutamento"]))];
+            grupos.forEach(g => {
+                $('#grupoSelect').append(new Option(g, g));
+            });
+
+            // Initialize DataTable
+            dataTable = $('#docentesTable').DataTable({
+                data: rawData,
+                columns: [
+                    { data: 'N.º Ordem' },
+                    { data: 'N.º Utilizador' },
+                    { data: 'Nome do/a Candidato/a' },
+                    { data: 'Grupo Recrutamento' },
+                    { data: 'Prioridade' },
+                    { data: 'Graduação' },
+                    { data: 'Classificação Profissional' },
+                    { data: 'Idade' },
+                    { 
+                        data: 'Situação',
+                        render: function(data) {
+                            const isColocado = data === 'Colocado';
+                            const badgeClass = isColocado ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
+                            return `<span class="px-2 py-1 text-xs font-semibold rounded-full ${badgeClass}">${data}</span>`;
+                        }
+                    }
+                ],
+                language: {
+                    url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/pt-PT.json'
+                },
+                responsive: true,
+                order: [[5, 'desc']]
+            });
+
+            // Event Listeners
+            $('#grupoSelect, #orderSelect, .priority-checkbox').on('change', updateDashboard);
+
+            // Initial render
+            updateDashboard();
+        });
+
+        function updateDashboard() {
+            const selectedGrupo = $('#grupoSelect').val();
+            const order = $('#orderSelect').val();
+            const selectedPriorities = $('.priority-checkbox:checked').map(function() { return parseInt($(this).val()); }).get();
+
+            let filteredData = rawData.filter(item => {
+                const matchGrupo = selectedGrupo === 'ALL' || item["Grupo Recrutamento"] === selectedGrupo;
+                const matchPriority = selectedPriorities.includes(item["Prioridade"]);
+                return matchGrupo && matchPriority;
+            });
+
+            // Sort data
+            filteredData.sort((a, b) => {
+                return order === 'desc' ? b["Graduação"] - a["Graduação"] : a["Graduação"] - b["Graduação"];
+            });
+
+            // Update DataTable
+            dataTable.clear().rows.add(filteredData).draw();
+
+            // Update Metrics
+            const total = filteredData.length;
+            const colocados = filteredData.filter(i => i["Situação"] === 'Colocado').length;
+            const gradSum = filteredData.reduce((acc, i) => acc + i["Graduação"], 0);
+            const gradMedia = total > 0 ? (gradSum / total).toFixed(3) : '0.000';
+            const gradMax = total > 0 ? Math.max(...filteredData.map(i => i["Graduação"])).toFixed(3) : '0.000';
+
+            $('#statTotal').text(total);
+            $('#statColocados').text(colocados);
+            $('#statGradMedia').text(gradMedia);
+            $('#statGradMax').text(gradMax);
+
+            // Update Charts
+            updateCharts(filteredData);
+        }
+
+        function updateCharts(data) {
+            // Chart Situação
+            const colocados = data.filter(i => i["Situação"] === 'Colocado').length;
+            const naoColocados = data.filter(i => i["Situação"] !== 'Colocado').length;
+
+            if (chartSituacao) chartSituacao.destroy();
+            const ctx1 = document.getElementById('chartSituacao').getContext('2d');
+            chartSituacao = new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Colocado', 'Não Colocado'],
+                    datasets: [{
+                        data: [colocados, naoColocados],
+                        backgroundColor: ['#10b981', '#f43f5e']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Chart Prioridade
+            const p1 = data.filter(i => i["Prioridade"] === 1).length;
+            const p2 = data.filter(i => i["Prioridade"] === 2).length;
+            const p3 = data.filter(i => i["Prioridade"] === 3).length;
+
+            if (chartPrioridade) chartPrioridade.destroy();
+            const ctx2 = document.getElementById('chartPrioridade').getContext('2d');
+            chartPrioridade = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['1ª Prioridade', '2ª Prioridade', '3ª Prioridade'],
+                    datasets: [{
+                        label: 'N.º de Candidatos',
+                        data: [p1, p2, p3],
+                        backgroundColor: '#3b82f6'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+    </script>
+</body>
+</html>
